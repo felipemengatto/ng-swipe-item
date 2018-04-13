@@ -1,0 +1,19 @@
+{
+  "name": "ng-swipe-item",
+  "version": "1.0.1",
+  "description": "AngularJS ngSwipeItem directive ============= An AngularJS directive that creates swipeable list items based on the AngularJS's *$swipe* service. Actions for both *swipe-right* and *swipe-left* can be defined.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/felipemengatto/ng-swipe-item.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/felipemengatto/ng-swipe-item/issues"
+  },
+  "homepage": "https://github.com/felipemengatto/ng-swipe-item#readme"
+}

@@ -8,8 +8,8 @@
  * - https://github.com/winkerVSbecks/swipe-li
  *
  **/
-angular.module('ngSwipeItem',['ngTouch'])
-  .directive('ngSwipeItem', ['$swipe','$timeout', function ($swipe, $timeout) {
+angular.module('ngSwipeItem',['ngTouch', 'socialbase.sweetAlert'])
+  .directive('ngSwipeItem', ['$swipe','$timeout', 'SweetAlert', function ($swipe, $timeout, SweetAlert) {
     return {
       restrict: 'A',
       transclude: true,
@@ -172,9 +172,30 @@ angular.module('ngSwipeItem',['ngTouch'])
             // the element to the origin.
             var finalDistance_x = finalCoords.x - initialCoord_x;
             var elementWidth = swiperContent.width();
-            if(Math.abs(finalDistance_x) > elementWidth * threshold) {
-              removeFromList(finalDistance_x);
+
+            if ( (finalDistance_x > 0 && scope.onRigth === undefined) || (finalDistance_x < 0 && scope.onLeft === undefined) ) {
+              returnToOrigin();
+              return;
             }
+
+            if(Math.abs(finalDistance_x) > elementWidth * threshold) {
+        
+              SweetAlert.swal({
+                title: 'Voce deseja apagar este item?',
+                text: 'Ele sera excluido definitivamente',
+                icon: 'warning',
+                buttons: ['Cancelar', 'Deletar'],
+                dangerMode: true,
+              })
+              .then(function (isConfirm) {
+                if (isConfirm) {
+                  removeFromList(finalDistance_x);
+                } else {
+                  returnToOrigin();
+                }
+              });
+            }
+
             else {
               returnToOrigin();
             }

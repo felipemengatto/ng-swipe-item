@@ -21,14 +21,17 @@ angular.module('ngSwipeItem',['ngTouch', 'socialbase.sweetAlert'])
         rightTemplate: '@'
       },
       template: '<div style="position:relative">' +
-                  '<ng-include ng-style="leftTemplateStyle" ng-show="showLeftTemplate" src="leftTemplate"></ng-include>' +
-                  '<ng-include ng-style="rightTemplateStyle" ng-show="showRightTemplate" src="rightTemplate"></ng-include>' +
+                  '<div class="bg-danger" ng-style="rightTemplateStyle">' +
+                    '<button class="btn btn-danger" ng-click="onLeft();"> Excluir </button>' +
+                  '</div>' +
+                  '<ng-include ng-style="leftTemplateStyle" ng-show="showLeftTemplate" src="rightTemplate"></ng-include>' +
                   '<div class="swiper-content">' +
                      '<div ng-transclude></div>' +
                   '</div>' +
                 '</div>',
       link: function postLink(scope, element, attrs) {
 
+        var swiperContent = angular.element('.swiper-content', element);
         scope.leftTemplate = attrs.leftTemplate;
         scope.rightTemplate = attrs.rightTemplate;
 
@@ -38,13 +41,18 @@ angular.module('ngSwipeItem',['ngTouch', 'socialbase.sweetAlert'])
 
         scope.rightTemplateStyle = {
           'position': 'absolute',
-          'right': '0px'
+          'width': '100%',
+          'height': '100%',
+          'right': '0',
+          'top': '0',
+          'display': 'flex',
+          'justify-content': 'flex-end',
+          'align-items': 'center'
         };
 
-        var swiperContent = angular.element('.swiper-content', element);
 
         // threshold is 0.5 by default.
-        var threshold = scope.threshold || 0.5;
+        var threshold = scope.threshold || 0.1;
 
         swiperContent.css({
           'position': 'relative',
@@ -143,24 +151,26 @@ angular.module('ngSwipeItem',['ngTouch', 'socialbase.sweetAlert'])
 
           move: function(currentPosition) {
             var currentCoord_x = currentPosition.x;
-            setElementOpacity(currentCoord_x - initialCoord_x);
-            swiperContent.css('left', currentCoord_x - initialCoord_x);
+            // setElementOpacity(currentCoord_x - initialCoord_x);
+            
+            if ((currentCoord_x - initialCoord_x) < 0) {
+              swiperContent.css('left', currentCoord_x - initialCoord_x);
+            }
 
             // If current position is higher than the threshold, then show the
             // background template.
-            var elementWidth = swiperContent.width();
-            if( Math.abs(currentCoord_x - initialCoord_x) > (elementWidth * threshold)) {
-              if(initialCoord_x > currentCoord_x) {
-                scope.showRightTemplate = true;
-              }
-              else {
-                scope.showLeftTemplate = true;
-              }
-            }
-            else {
-              scope.showLeftTemplate = false;
-              scope.showRightTemplate = false;
-            }
+            // var elementWidth = swiperContent.width();
+            // if( Math.abs(currentCoord_x - initialCoord_x) > (elementWidth * threshold)) {
+            //   if(initialCoord_x > currentCoord_x) {
+            //     scope.showRightTemplate = true;
+            //   }
+            //   else {
+            //     scope.showLeftTemplate = true;
+            //   }
+            // }else {
+            //   scope.showLeftTemplate = false;
+            //   scope.showRightTemplate = false;
+            // }
 
             // Update the view.
             scope.$apply();
@@ -173,30 +183,30 @@ angular.module('ngSwipeItem',['ngTouch', 'socialbase.sweetAlert'])
             var finalDistance_x = finalCoords.x - initialCoord_x;
             var elementWidth = swiperContent.width();
 
+
             if ( (finalDistance_x > 0 && scope.onRigth === undefined) || (finalDistance_x < 0 && scope.onLeft === undefined) ) {
               returnToOrigin();
               return;
             }
 
-            if(Math.abs(finalDistance_x) > elementWidth * threshold) {
-        
-              SweetAlert.swal({
-                title: 'Voce deseja apagar este item?',
-                text: 'Ele sera excluido definitivamente',
-                icon: 'warning',
-                buttons: ['Cancelar', 'Deletar'],
-                dangerMode: true,
-              })
-              .then(function (isConfirm) {
-                if (isConfirm) {
-                  removeFromList(finalDistance_x);
-                } else {
-                  returnToOrigin();
-                }
-              });
+            if (finalDistance_x > -20) {
+              return;
             }
 
-            else {
+            if (finalDistance_x < 0 && Math.abs(finalDistance_x) < (elementWidth/2)) {
+              returnToOrigin();
+              swiperContent.css(applyTransition(true));
+              swiperContent.css('left', -100);
+              return;
+            } else if (finalDistance_x > 0) {
+              returnToOrigin();
+              swiperContent.css(applyTransition(true));
+              swiperContent.css('left', 100);
+              return;
+            }
+
+            if(Math.abs(finalDistance_x) > elementWidth * threshold) {
+              scope.onLeft();
               returnToOrigin();
             }
 

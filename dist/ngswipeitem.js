@@ -22,7 +22,7 @@ angular.module('ngSwipeItem',['ngTouch', 'socialbase.sweetAlert'])
       },
       template: '<div style="position:relative">' +
                   '<div class="bg-danger" ng-style="rightTemplateStyle">' +
-                    '<button class="btn btn-danger" ng-click="onLeft();"> Excluir </button>' +
+                    '<button class="btn btn-danger" ng-click="executeLeft();"> Excluir </button>' +
                   '</div>' +
                   '<ng-include ng-style="leftTemplateStyle" ng-show="showLeftTemplate" src="rightTemplate"></ng-include>' +
                   '<div class="swiper-content">' +
@@ -63,6 +63,10 @@ angular.module('ngSwipeItem',['ngTouch', 'socialbase.sweetAlert'])
           'overflow': 'hidden'
         });
 
+        scope.executeLeft = function() {
+          scope.onLeft();
+          returnToOrigin();
+        }
 
         function applyTransition(apply) {
           var transitionProperty = {};

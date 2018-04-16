@@ -21,7 +21,7 @@ angular.module('ngSwipeItem',['ngTouch', 'socialbase.sweetAlert'])
         rightTemplate: '@'
       },
       template: '<div style="position:relative">' +
-                  '<div class="bg-danger" ng-style="rightTemplateStyle">' +
+                  '<div class="bg-danger" ng-style="rightTemplateStyle" ng-show="showRightTemplate">' +
                     '<button class="btn btn-danger" ng-click="executeLeft();"> Excluir </button>' +
                   '</div>' +
                   '<ng-include ng-style="leftTemplateStyle" ng-show="showLeftTemplate" src="rightTemplate"></ng-include>' +
@@ -34,6 +34,18 @@ angular.module('ngSwipeItem',['ngTouch', 'socialbase.sweetAlert'])
         var swiperContent = angular.element('.swiper-content', element);
         scope.leftTemplate = attrs.leftTemplate;
         scope.rightTemplate = attrs.rightTemplate;
+
+        // threshold is 0.5 by default.
+        var threshold = scope.threshold || 0.1;
+
+        swiperContent.css({
+          'position': 'relative',
+          'cursor': 'pointer',
+        });
+
+        swiperContent.parent().css({
+          'overflow': 'hidden'
+        });
 
         scope.leftTemplateStyle = {
           'position': 'absolute'
@@ -49,19 +61,6 @@ angular.module('ngSwipeItem',['ngTouch', 'socialbase.sweetAlert'])
           'justify-content': 'flex-end',
           'align-items': 'center'
         };
-
-
-        // threshold is 0.5 by default.
-        var threshold = scope.threshold || 0.1;
-
-        swiperContent.css({
-          'position': 'relative',
-          'cursor': 'pointer',
-        });
-
-        swiperContent.parent().css({
-          'overflow': 'hidden'
-        });
 
         scope.executeLeft = function() {
           scope.onLeft();
@@ -117,7 +116,7 @@ angular.module('ngSwipeItem',['ngTouch', 'socialbase.sweetAlert'])
         function returnToOrigin() {
           swiperContent.css('left', 0);
           swiperContent.css(applyTransition(true));
-          setElementOpacity(0);
+          setElementOpacity(0);       
         }
 
 
@@ -155,26 +154,21 @@ angular.module('ngSwipeItem',['ngTouch', 'socialbase.sweetAlert'])
 
           move: function(currentPosition) {
             var currentCoord_x = currentPosition.x;
-            // setElementOpacity(currentCoord_x - initialCoord_x);
-            
-            if ((currentCoord_x - initialCoord_x) < 0) {
-              swiperContent.css('left', currentCoord_x - initialCoord_x);
+            var elementWidth = swiperContent.width();
+            var currentDistance = (currentCoord_x - initialCoord_x);
+            scope.rightTemplateStyle['height'] = Math.round((swiperContent.height() - 1));
+
+            if (currentDistance < 0) {
+              swiperContent.css('left', currentDistance);
             }
 
-            // If current position is higher than the threshold, then show the
-            // background template.
-            // var elementWidth = swiperContent.width();
-            // if( Math.abs(currentCoord_x - initialCoord_x) > (elementWidth * threshold)) {
-            //   if(initialCoord_x > currentCoord_x) {
-            //     scope.showRightTemplate = true;
-            //   }
-            //   else {
-            //     scope.showLeftTemplate = true;
-            //   }
-            // }else {
-            //   scope.showLeftTemplate = false;
-            //   scope.showRightTemplate = false;
-            // }
+            if(initialCoord_x > currentCoord_x) {
+              scope.showRightTemplate = true;
+            } else {
+              $timeout(function() {
+                scope.showRightTemplate = false;
+              }, 200);
+            }
 
             // Update the view.
             scope.$apply();
@@ -186,14 +180,14 @@ angular.module('ngSwipeItem',['ngTouch', 'socialbase.sweetAlert'])
             // the element to the origin.
             var finalDistance_x = finalCoords.x - initialCoord_x;
             var elementWidth = swiperContent.width();
-
-
+          
             if ( (finalDistance_x > 0 && scope.onRigth === undefined) || (finalDistance_x < 0 && scope.onLeft === undefined) ) {
               returnToOrigin();
               return;
             }
 
             if (finalDistance_x > -20) {
+              returnToOrigin();
               return;
             }
 
